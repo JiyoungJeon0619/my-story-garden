@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --cream-50: #faf8f3;
+  --cream-100: #f5f0e8;
+  --cream-200: #ede3d0;
+  --sage-400: #8aab8a;
+  --sage-500: #6b8f6b;
+  --rust-400: #c4785a;
+  --stone-warm: #8c7b6b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--cream-50);
+  min-height: 100vh;
+}
+
+/* 큰 글씨 기본 설정 (시니어 접근성) */
+body {
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+/* 스크롤바 스타일 */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--cream-100);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--sage-400);
+  border-radius: 3px;
+}
+
+/* 대화창 애니메이션 */
+@keyframes messageIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-enter {
+  animation: messageIn 0.3s ease forwards;
+}
+
+/* 페이지 전환 */
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-enter {
+  animation: pageIn 0.5s ease forwards;
+}
+
+/* 로딩 점 애니메이션 */
+@keyframes dotBounce {
+  0%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-6px); }
+}
+
+.dot-bounce > span {
+  display: inline-block;
+  animation: dotBounce 1.4s ease-in-out infinite;
+}
+.dot-bounce > span:nth-child(2) { animation-delay: 0.2s; }
+.dot-bounce > span:nth-child(3) { animation-delay: 0.4s; }
+
+/* 버튼 공통 */
+.btn-primary {
+  @apply bg-sage-500 text-white px-6 py-3 rounded-2xl font-sans font-medium 
+         text-lg transition-all duration-200 hover:bg-sage-600 active:scale-95
+         shadow-sm hover:shadow-md;
+}
+
+.btn-secondary {
+  @apply bg-cream-100 text-stone-700 px-6 py-3 rounded-2xl font-sans font-medium 
+         text-lg border border-cream-200 transition-all duration-200 
+         hover:bg-cream-200 active:scale-95;
+}
+
+/* 카드 공통 */
+.card {
+  @apply bg-white rounded-3xl shadow-sm border border-cream-100 p-6;
+}
