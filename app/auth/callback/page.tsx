@@ -10,14 +10,15 @@ export default function AuthCallback() {
 
   useEffect(() => {
     const handleCallback = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession()
+      const { data: { session }, error } = await supabase.auth.exchangeCodeForSession(
+        window.location.search
+      )
 
       if (error || !session) {
         router.push('/')
         return
       }
 
-      // 프로필 존재 여부 확인
       const { data: profile } = await supabase
         .from('profiles')
         .select('id, story_category')
@@ -25,19 +26,17 @@ export default function AuthCallback() {
         .single()
 
       if (!profile) {
-        // 신규 사용자 → 프로필 생성 후 온보딩
         await supabase.from('profiles').insert({
           id: session.user.id,
           kakao_id: session.user.user_metadata?.provider_id,
-          nickname: session.user.user_metadata?.name || '이야기꾼',
+          nickname: session.user.user_metadata?.name ||
+                    session.user.user_metadata?.full_name || '이야기꾼',
           avatar_url: session.user.user_metadata?.avatar_url,
         })
         router.push('/onboarding')
       } else if (!profile.story_category) {
-        // 온보딩 미완료
         router.push('/onboarding')
       } else {
-        // 기존 사용자 → 홈
         router.push('/home')
       }
     }
@@ -52,7 +51,7 @@ export default function AuthCallback() {
           style={{ background: 'linear-gradient(135deg, #8aab8a, #6b8f6b)' }}>
           <span className="text-2xl">🌿</span>
         </div>
-        <p className="text-stone-warm text-lg font-serif">잠시만요...</p>
+        <p className="text-stone-500 text-lg font-serif">잠시만요...</p>
       </div>
     </div>
   )
