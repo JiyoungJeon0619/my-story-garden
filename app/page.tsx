@@ -16,15 +16,18 @@ export default function HomePage() {
   }, [])
 
   const handleKakaoLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'kakao',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-        scopes: 'profile_nickname profile_image',
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'kakao',
+    options: {
+      redirectTo: `${window.location.origin}/auth/callback`,
+      scopes: 'profile_nickname profile_image',
+      queryParams: {
+        scope: 'profile_nickname profile_image',
       },
-    })
-    if (error) console.error('카카오 로그인 오류:', error)
-  }
+    },
+  })
+  if (error) console.error('카카오 로그인 오류:', error)
+}
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-6"
