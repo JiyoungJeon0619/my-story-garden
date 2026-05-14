@@ -49,7 +49,7 @@ ${conversationText}
       n: 1,
     })
 
-    const imageUrl = imageResponse.data[0]?.url
+    const imageUrl = imageResponse.data?.[0]?.url
     if (!imageUrl) throw new Error('Image generation failed')
 
     // 3. 한국어 캡션 생성
