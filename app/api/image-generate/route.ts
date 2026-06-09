@@ -42,7 +42,7 @@ ${conversationText}
 
     // 2. DALL-E로 이미지 생성
     const imageResponse = await openai.images.generate({
-      model: 'dall-e-3',
+      model: 'dall-e-3' as any,
       prompt: imagePrompt,
       size: '1024x1024',
       quality: 'standard',

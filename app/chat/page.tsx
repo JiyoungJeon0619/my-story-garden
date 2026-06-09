@@ -32,8 +32,8 @@ function ChatContent() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-    // 메시지가 4개 이상이면 이미지 생성 옵션 보여주기
-    if (messages.length >= 4 && messages.filter(m => m.role === 'user').length >= 2) {
+    // 메시지가 12개 이상이면 이미지 생성 옵션 보여주기
+    if (messages.length >= 12 && messages.filter(m => m.role === 'user').length >= 6) {
       setShowImagePrompt(true)
     }
   }, [messages])
