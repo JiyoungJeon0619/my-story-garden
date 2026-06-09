@@ -41,12 +41,12 @@ export default function HomePage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/'); return }
 
-    const { data: prof } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single()
+    const { data: profiles } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
 
+    const prof = profiles?.[0] ?? null
     if (!prof?.story_category) { router.push('/onboarding'); return }
     setProfile(prof)
 

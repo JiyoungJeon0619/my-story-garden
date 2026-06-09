@@ -63,25 +63,35 @@ export default function OnboardingPage() {
   }
 
   const handleStart = async () => {
-    if (!selected) return
-    setLoading(true)
+  if (!selected) return
+  setLoading(true)
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { router.push('/'); return }
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) { router.push('/'); return }
 
-    // birth_decade 계산: "1950s" 형식
-    const decade = `${Math.floor(parseInt(birthYear) / 10) * 10}s`
+  const decade = `${Math.floor(parseInt(birthYear) / 10) * 10}s`
 
-    await supabase.from('profiles')
-      .update({
-        story_category: selected,
-        birth_decade: decade,
-      })
-      .eq('id', user.id)
+  const { error } = await supabase.from('profiles')
+    .upsert({
+      id: user.id,
+      kakao_id: user.user_metadata?.provider_id,
+      nickname: user.user_metadata?.name ||
+                user.user_metadata?.full_name || '이야기꾼',
+      avatar_url: user.user_metadata?.avatar_url,
+      story_category: selected,
+      birth_decade: decade,
+    })
 
-    router.push('/home')
+  console.log('upsert error:', error)
+
+  if (error) {
+    alert('저장 오류: ' + error.message)
+    setLoading(false)
+    return
   }
 
+  router.push('/home')
+}
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12"
       style={{ background: 'linear-gradient(160deg, #faf8f3 0%, #f0ebe0 100%)' }}>
