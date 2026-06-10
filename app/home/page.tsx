@@ -50,18 +50,18 @@ export default function HomePage() {
     if (!prof?.story_category) { router.push('/onboarding'); return }
     setProfile(prof)
 
-    // 오늘의 질문 가져오기
-    const { data: questions } = await supabase
-      .from('daily_questions')
-      .select('question')
-      .eq('category', prof.story_category)
-      .eq('is_active', true)
-
-    if (questions && questions.length > 0) {
-      // 날짜 기반으로 오늘 질문 결정 (매일 바뀜)
-      const dayIndex = new Date().getDate() % questions.length
-      setQuestion(questions[dayIndex].question)
-    }
+      // Claude가 오늘의 질문 생성
+    const qRes = await fetch('/api/daily-question', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        category: prof.story_category,
+        birthDecade: prof.birth_decade || '1950s',
+        nickname: prof.nickname || '이야기꾼',
+      }),
+    })
+    const qData = await qRes.json()
+    setQuestion(qData.question || '오늘 어떤 이야기를 나눠볼까요?')
 
     // 최근 세션 가져오기
     const { data: session } = await supabase
