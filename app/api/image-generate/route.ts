@@ -85,17 +85,38 @@ ${conversationText}
       ? captionResponse.content[0].text.trim()
       : '소중한 기억'
 
-    // 4. DB에 저장
-    if (sessionId && imageUrlRaw) {
+        // 4. base64를 Supabase Storage에 업로드
+    const imageBuffer = Buffer.from(imageBase64 || '', 'base64')
+    const fileName = `${user.id}/${Date.now()}.png`
+
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('story-images')
+      .upload(fileName, imageBuffer, {
+        contentType: 'image/png',
+        upsert: false,
+      })
+
+    let storedImageUrl = finalImageUrl
+
+    if (!uploadError && uploadData) {
+      const { data: urlData } = supabase.storage
+        .from('story-images')
+        .getPublicUrl(fileName)
+      storedImageUrl = urlData.publicUrl
+    }
+
+    // 5. DB에 저장
+    if (sessionId) {
       await supabase.from('story_images').insert({
         session_id: sessionId,
         user_id: user.id,
-        image_url: imageUrlRaw,
+        image_url: storedImageUrl,
         prompt: imagePrompt,
         caption: caption,
       })
     }
 
+    return NextResponse.json({ imageUrl: finalImageUrl, caption, prompt: imagePrompt })
     return NextResponse.json({ imageUrl: finalImageUrl, caption, prompt: imagePrompt })
 
   } catch (error) {
