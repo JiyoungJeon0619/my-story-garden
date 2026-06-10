@@ -32,10 +32,7 @@ function ChatContent() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-    // 메시지가 12개 이상이면 이미지 생성 옵션 보여주기
-    if (messages.length >= 12 && messages.filter(m => m.role === 'user').length >= 6) {
-      setShowImagePrompt(true)
-    }
+    
   }, [messages])
 
   const initChat = async () => {
@@ -109,7 +106,15 @@ function ChatContent() {
 
       const data = await res.json()
       if (data.message) {
-        setMessages(prev => [...prev, { role: 'assistant', content: data.message }])
+        const rawMessage = data.message
+        const hasDrawSuggestion = rawMessage.includes('[DRAW_SUGGESTION]')
+        const cleanMessage = rawMessage.replace('[DRAW_SUGGESTION]', '').trim()
+
+        setMessages(prev => [...prev, { role: 'assistant', content: cleanMessage }])
+
+        if (hasDrawSuggestion) {
+          setShowImagePrompt(true)
+        }
       }
     } catch (err) {
       console.error(err)
