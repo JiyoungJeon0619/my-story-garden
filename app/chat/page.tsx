@@ -242,8 +242,8 @@ function ChatContent() {
           <div className="flex justify-center message-enter">
             <div className="card max-w-xs">
               <div className="rounded-2xl overflow-hidden mb-3">
-                <Image src={generatedImage.url} alt={generatedImage.caption}
-                  width={400} height={400} className="w-full object-cover" />
+                <img src={generatedImage.url} alt={generatedImage.caption}
+                  className="w-full object-cover" />
               </div>
               <p className="font-serif text-center text-stone-700 text-lg">
                 {generatedImage.caption}

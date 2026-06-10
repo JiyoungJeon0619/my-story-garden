@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
       max_tokens: 200,
       messages: [{
         role: 'user',
-        content: `다음 대화에서 가장 인상적인 장면을 수채화 스타일의 DALL-E 이미지 프롬프트로 만들어주세요.
+        content: `다음 대화에서 가장 인상적인 장면을 수채화 스타일의 이미지 프롬프트로 만들어주세요.
         
 대화 내용:
 ${conversationText}
@@ -38,7 +38,7 @@ ${conversationText}
       ? promptResponse.content[0].text.trim()
       : 'A warm Korean home scene, watercolor illustration, warm vintage tones, soft and nostalgic'
 
-    // 2. OpenAI API 직접 호출 (fetch 사용)
+    // 2. OpenAI API 직접 호출
     const openaiResponse = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
       headers: {
@@ -55,14 +55,19 @@ ${conversationText}
     })
 
     const openaiData = await openaiResponse.json()
-    
+
     if (!openaiResponse.ok) {
       console.error('OpenAI error:', openaiData)
       throw new Error(openaiData.error?.message || 'Image generation failed')
     }
 
-    const imageUrl = openaiData.data?.[0]?.url
-    if (!imageUrl) throw new Error('No image URL returned')
+    // gpt-image-1은 base64로 반환
+    const imageBase64 = openaiData.data?.[0]?.b64_json
+    const imageUrlRaw = openaiData.data?.[0]?.url
+
+    if (!imageBase64 && !imageUrlRaw) throw new Error('No image returned')
+
+    const finalImageUrl = imageUrlRaw || `data:image/png;base64,${imageBase64}`
 
     // 3. 한국어 캡션 생성
     const captionResponse = await anthropic.messages.create({
@@ -81,17 +86,18 @@ ${conversationText}
       : '소중한 기억'
 
     // 4. DB에 저장
-    if (sessionId) {
+    if (sessionId && imageUrlRaw) {
       await supabase.from('story_images').insert({
         session_id: sessionId,
         user_id: user.id,
-        image_url: imageUrl,
+        image_url: imageUrlRaw,
         prompt: imagePrompt,
         caption: caption,
       })
     }
 
-    return NextResponse.json({ imageUrl, caption, prompt: imagePrompt })
+    return NextResponse.json({ imageUrl: finalImageUrl, caption, prompt: imagePrompt })
+
   } catch (error) {
     console.error('Image generation error:', error)
     return NextResponse.json({ error: 'Image generation failed' }, { status: 500 })
