@@ -49,7 +49,7 @@ ${conversationText}
         model: 'gpt-image-1',
         prompt: imagePrompt,
         size: '1024x1024',
-        quality: 'standard',
+        quality: 'medium',
         n: 1,
       }),
     })
