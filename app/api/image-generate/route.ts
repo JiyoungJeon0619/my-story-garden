@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from 'openai'
 import Anthropic from '@anthropic-ai/sdk'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY! })
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
 
 export async function POST(req: NextRequest) {
@@ -40,17 +38,31 @@ ${conversationText}
       ? promptResponse.content[0].text.trim()
       : 'A warm Korean home scene, watercolor illustration, warm vintage tones, soft and nostalgic'
 
-    // 2. DALL-E로 이미지 생성
-    const imageResponse = await openai.images.generate({
-      model: 'dall-e-3' as any,
-      prompt: imagePrompt,
-      size: '1024x1024',
-      quality: 'standard',
-      n: 1,
+    // 2. OpenAI API 직접 호출 (fetch 사용)
+    const openaiResponse = await fetch('https://api.openai.com/v1/images/generations', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'dall-e-3',
+        prompt: imagePrompt,
+        size: '1024x1024',
+        quality: 'standard',
+        n: 1,
+      }),
     })
 
-    const imageUrl = imageResponse.data?.[0]?.url
-    if (!imageUrl) throw new Error('Image generation failed')
+    const openaiData = await openaiResponse.json()
+    
+    if (!openaiResponse.ok) {
+      console.error('OpenAI error:', openaiData)
+      throw new Error(openaiData.error?.message || 'Image generation failed')
+    }
+
+    const imageUrl = openaiData.data?.[0]?.url
+    if (!imageUrl) throw new Error('No image URL returned')
 
     // 3. 한국어 캡션 생성
     const captionResponse = await anthropic.messages.create({
